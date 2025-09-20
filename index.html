@@ -122,9 +122,6 @@ header {
 }
 </style>
 </head>
-
-</style>
-</head>
 <body>
 
 <header>
@@ -252,18 +249,41 @@ function toggleLike(btn){
   runTransaction(ref(db, 'likes/' + date), current => (current || 0) + 1).then(()=> loadLikes(date));
 }
 
+// ------------------- Load Comments -------------------
 async function loadComments(date){
   const commentsList = document.getElementById("commentsList");
   commentsList.innerHTML = '';
   const snap = await get(ref(db, 'comments/' + date));
   const comments = snap.val() || [];
-  comments.forEach(c => {
+
+  comments.forEach((c, index) => {
     const div = document.createElement('div');
     div.className = 'comment';
-    div.innerHTML = `<span>${c}</span>`;
+    div.innerHTML = `
+      <span>${c}</span>
+      <button class="delete-comment" onclick="deleteComment(${index}, '${date}')">❌</button>
+    `;
     commentsList.appendChild(div);
   });
 }
+
+// ------------------- Delete Comment -------------------
+function deleteComment(index, date){
+  const password = prompt("Enter admin password to delete this comment:");
+  if(password !== "0711radhekrishna0808") {
+    alert("Wrong password! Only admin can delete comments.");
+    return;
+  }
+
+  const commentsRef = ref(db, 'comments/' + date);
+  get(commentsRef).then(snap => {
+    const comments = snap.val() || [];
+    comments.splice(index, 1); // remove comment
+    set(commentsRef, comments);
+    loadComments(date);
+  });
+}
+
 
 function toggleComments(){ 
   let section=document.getElementById("commentSection"); 
@@ -334,4 +354,5 @@ window.searchThoughts = searchThoughts;
 </script>
 </body>
 </html>
+
 
