@@ -35,7 +35,7 @@ header {
 .menu-btn.open div:nth-child(2){ opacity:0; }
 .menu-btn.open div:nth-child(3){ transform: rotate(-45deg) translate(6px,-6px); }
 
-.lang-menu { display: none; position: absolute; top: 60px; right: 45px; background: rgba(255,255,255,0.9); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.lang-menu { display: none; position: absolute; top: 60px; right: 45px; background: rgba(255,255,255,0.9); border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 100; }
 .lang-menu button, .lang-menu a {
   display: block;
   width: 100%;
@@ -48,12 +48,7 @@ header {
   cursor: pointer;
   text-align: center;
   text-decoration: none;
-  font-size: 14px;  /* same as buttons */
-}
-.feedbackBtn {
-  width: 100px;        /* sets horizontal size */
-  padding: 6px 6px;  /* vertical and horizontal padding */
-  font-size: 16px;     /* size of text */
+  font-size: 14px;
 }
 
 .lang-menu button:hover, .lang-menu a:hover {
@@ -63,7 +58,7 @@ header {
 .history-btn { position: absolute; left: 20px; top: 20px; font-size: 24px; cursor: pointer; color: gold; background: none; border: none; transition: 0.3s; }
 .history-btn:hover { transform: scale(1.2); }
 
-.date-picker { display: none; position: absolute; left: 20px; top: 60px; background: rgba(255,255,255,0.95); padding: 8px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.date-picker { display: none; position: absolute; left: 20px; top: 60px; background: rgba(255,255,255,0.95); padding: 8px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 100; }
 
 .thought-card { background: rgba(255,250,240,0.9); margin: 50px auto 20px auto; padding: 25px; border-radius: 20px; width: 90%; max-width: 600px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); text-align: center; position: relative; }
 .today-label { font-weight: bold; color: #8b0000; margin-bottom: 10px; font-size: 18px; }
@@ -78,17 +73,19 @@ header {
 .details { display: none; margin-top: 10px; padding: 10px; background: #fff0e1; border-left: 4px solid #8b0000; border-radius: 10px; font-size: 16px; }
 
 .thought-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
-.like-btn, .comment-btn, .bookmark-btn, .share-btn, .meditate-btn { border: 2px solid black; background: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 16px; transition: 0.3s; }
+.like-btn, .comment-btn, .bookmark-btn, .share-btn, .meditate-btn, .notify-btn { border: 2px solid black; background: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 16px; transition: 0.3s; }
 .like-btn.liked { color: red; border-color: red; }
-.comment-btn:hover, .bookmark-btn:hover, .share-btn:hover, .meditate-btn:hover { background: #ffe4b5; }
+.comment-btn:hover, .bookmark-btn:hover, .share-btn:hover, .meditate-btn:hover, .notify-btn:hover { background: #ffe4b5; }
+
+.notify-btn.active { background: #8b0000; color: gold; border-color: #8b0000; }
+.notify-btn.active:hover { background: #a52a2a; }
 
 .comment-section { display: none; margin-top: 20px; padding: 10px; background: #f9f9f9; border-radius: 10px; border: 1px solid #ddd; }
 .comment-section input { width: 80%; padding: 8px; margin-right: 5px; border-radius: 5px; border: 1px solid #ccc; }
 .comment-section button { padding: 8px 12px; border: none; background: #8b0000; color: gold; border-radius: 5px; cursor: pointer; }
 
 .comment { background: #fff; padding: 8px; margin: 6px 0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; font-size: 15px; }
-.comment .like-comment { border: none; background: none; cursor: pointer; font-size: 14px; color: black; }
-.comment .like-comment.liked { color: red; }
+.comment .delete-comment { border: none; background: none; cursor: pointer; font-size: 14px; color: black; }
 
 .om-symbol { font-size: 80px; color: gold; margin: 40px 0; animation: zoomAura 2s infinite alternate ease-in-out; }
 @keyframes zoomAura { 0% { transform: scale(1); opacity: 0.7; } 50% { transform: scale(1.3); opacity: 1; } 100% { transform: scale(1); opacity: 0.7; } }
@@ -99,24 +96,13 @@ header {
 .search-bar input { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #8b0000; }
 .search-bar button { padding: 8px 12px; border: none; background: #8b0000; color: gold; border-radius: 8px; cursor: pointer; }
 .search-bar button:hover { background: #a52a2a; }
-  <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bhagavad Gita Thoughts</title>
-<style>
-/* your current CSS like body, header, .menu-btn ... */
 
-... (all your existing styles here) ...
-
-/* ✅ Paste responsive code at the very end of this <style> */
 @media (max-width: 480px) {
    /* small phone styles */
 }
-
 @media (min-width: 481px) and (max-width: 768px) {
    /* tablet styles */
 }
-
 @media (min-width: 769px) {
    /* desktop styles */
 }
@@ -148,13 +134,22 @@ header {
   <button class="read-aloud" onclick="readAloud()">🔊</button>
   <button class="more-btn" onclick="toggleDetails()">More</button>
   <div class="details" id="details"></div>
+  
   <div class="thought-actions">
     <button class="like-btn" onclick="toggleLike(this)">❤️ Like (<span id="likeCount">0</span>)</button>
     <button class="comment-btn" onclick="toggleComments()">💬 Comment</button>
     <button class="bookmark-btn" onclick="toggleBookmark()">🔖 Bookmark</button>
     <button class="share-btn" onclick="shareThought()">🔗 Share</button>
     <button class="meditate-btn" onclick="toggleMeditation()">🕉️ Meditate</button>
+    <button class="notify-btn" id="notifyBtn" onclick="toggleNotificationSetup()">🔔 Notify Me</button>
   </div>
+
+  <div id="notificationTimeMenu" style="display: none; margin-top: 15px; background: #fff0e1; padding: 12px; border-radius: 12px; border-left: 4px solid #8b0000;">
+    <label for="notifyTime" style="font-weight: bold; color: #8b0000; font-size: 15px;">Select Notification Time: </label>
+    <input type="time" id="notifyTime" style="padding: 6px; border-radius: 6px; border: 1px solid #8b0000; margin: 0 8px; font-family: inherit;">
+    <button onclick="activateDailyNotification()" style="padding: 6px 14px; border: none; background: #8b0000; color: gold; border-radius: 6px; cursor: pointer; font-weight: bold;">Set</button>
+  </div>
+
   <div class="comment-section" id="commentSection">
     <div><input type="text" id="commentInput" placeholder="Write a comment..."><button onclick="postComment()">Send</button></div>
     <div id="commentsList"></div>
@@ -168,7 +163,6 @@ header {
 </audio>
 
 <script type="module">
-// ------------------- Firebase Modular SDK -------------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
 import { getDatabase, ref, get, set, runTransaction } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
@@ -186,27 +180,27 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ------------------- Variables -------------------
 let language = 'en';
 let thoughts = {};
 let availableDates = [];
-let today = new Date().toISOString().split("T")[0];
+let today = new Date().toISOString().split("T");
 let isMeditating = false;
+let notificationTimer = null;
 
-// ------------------- Load CSV -------------------
 fetch("Thoughts.csv")
   .then(res => res.text())
   .then(csv => {
     let rows = csv.split("\n").map(r => r.split(","));
     rows.shift();
     rows.forEach(row => {
+      if(row.length < 10) return;
       let [date, enThought, enDetails, enExample, hiThought, hiDetails, hiExample, guThought, guDetails, guExample] = row;
-      thoughts[date] = {
+      thoughts[date.trim()] = {
         en: { thought: enThought, details: enDetails, example: enExample },
         hi: { thought: hiThought, details: hiDetails, example: hiExample },
         gu: { thought: guThought, details: guDetails, example: guExample }
       };
-      availableDates.push(date);
+      availableDates.push(date.trim());
     });
 
     const selectDate = document.getElementById("selectedDate");
@@ -223,7 +217,6 @@ fetch("Thoughts.csv")
   })
   .catch(err => { document.getElementById("thought").innerText = "⚠ Unable to load thoughts file."; console.error(err); });
 
-// ------------------- Functions -------------------
 function loadThought(date){
   if(thoughts[date] && thoughts[date][language]){
     let t = thoughts[date][language];
@@ -249,7 +242,6 @@ function toggleLike(btn){
   runTransaction(ref(db, 'likes/' + date), current => (current || 0) + 1).then(()=> loadLikes(date));
 }
 
-// ------------------- Load Comments -------------------
 async function loadComments(date){
   const commentsList = document.getElementById("commentsList");
   commentsList.innerHTML = '';
@@ -267,7 +259,6 @@ async function loadComments(date){
   });
 }
 
-// ------------------- Delete Comment -------------------
 function deleteComment(index, date){
   const password = prompt("Enter admin password to delete this comment:");
   if(password !== "0711radhekrishna0808") {
@@ -278,12 +269,11 @@ function deleteComment(index, date){
   const commentsRef = ref(db, 'comments/' + date);
   get(commentsRef).then(snap => {
     const comments = snap.val() || [];
-    comments.splice(index, 1); // remove comment
+    comments.splice(index, 1);
     set(commentsRef, comments);
     loadComments(date);
   });
 }
-
 
 function toggleComments(){ 
   let section=document.getElementById("commentSection"); 
@@ -318,9 +308,8 @@ function showSubLangMenu(){
         <button id="langEn">English</button>
         <button id="langHi">हिंदी</button>
         <button id="langGu">ગુજરાતી</button>
-        <a id="feedbackBtn" href="https://docs.google.com/forms/d/e/1FAIpQLSe0EJ7hQ06ZdkQcRWHhBA7fCK0I0i1KbKBRGCg9xIt_fz755w/viewform?usp=header" target="_blank">Feedback</a>
+        <a id="feedbackBtn" class="feedbackBtn" href="https://docs.google.com/forms/d/e/1FAIpQLSe0EJ7hQ06ZdkQcRWHhBA7fCK0I0i1KbKBRGCg9xIt_fz755w/viewform?usp=header" target="_blank">Feedback</a>
     `;
-
     document.getElementById("langEn").addEventListener("click", () => setLanguage('en'));
     document.getElementById("langHi").addEventListener("click", () => setLanguage('hi'));
     document.getElementById("langGu").addEventListener("click", () => setLanguage('gu'));
@@ -331,10 +320,120 @@ function toggleDatePicker(){ let dp=document.getElementById("datePicker"); dp.st
 function toggleBookmark(){ let btn=document.querySelector(".bookmark-btn"); btn.classList.toggle("liked"); alert(btn.classList.contains("liked")?"Bookmarked!":"Removed from bookmarks!"); }
 function shareThought(){ let text=document.getElementById("thought").innerText; if(navigator.share){ navigator.share({title:"Bhagavad Gita Thought",text:text}); } else { prompt("Copy this thought:",text); } }
 function toggleMeditation() { const audio = document.getElementById("meditationAudio"); isMeditating = !isMeditating; if (isMeditating) audio.play(); else audio.pause(); }
-let streak=localStorage.getItem('streak')||0; document.getElementById("streakCounter").innerText=`Streak: ${streak}`;
+
 function searchThoughts(){ let query=document.getElementById("searchInput").value.toLowerCase(); let found=false; for(let date of availableDates){ if(new Date(date) <= new Date() && thoughts[date]['en'].thought.toLowerCase().includes(query)){ document.getElementById("selectedDate").value=date; loadThought(date); found=true; break; } } if(!found) alert("No matching thought found."); }
 
-// ------------------- Expose functions globally -------------------
+// ------------------- Notification System -------------------
+function checkExistingNotification() {
+  const isConfigured = localStorage.getItem("notifyActive") === "true";
+  const savedTime = localStorage.getItem("notifyTime");
+  const btn = document.getElementById("notifyBtn");
+  
+  if (isConfigured && savedTime) {
+    btn.innerText = `🔕 Stop Notifications (${savedTime})`;
+    btn.classList.add("active");
+    scheduleNextCheck();
+  }
+}
+
+function toggleNotificationSetup() {
+  const isConfigured = localStorage.getItem("notifyActive") === "true";
+  const menu = document.getElementById("notificationTimeMenu");
+  
+  if (isConfigured) {
+    localStorage.setItem("notifyActive", "false");
+    if (notificationTimer) clearInterval(notificationTimer);
+    
+    const btn = document.getElementById("notifyBtn");
+    btn.innerText = "🔔 Notify Me";
+    btn.classList.remove("active");
+    menu.style.display = "none";
+    alert("Daily notifications deactivated.");
+  } else {
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+  }
+}
+
+function activateDailyNotification() {
+  const timeInput = document.getElementById("notifyTime").value;
+  if (!timeInput) {
+    alert("Please select a valid time.");
+    return;
+  }
+
+  if (!("Notification" in window)) {
+    alert("This browser does not support desktop notifications.");
+    return;
+  }
+
+  Notification.requestPermission().then(permission => {
+    if (permission === "granted") {
+      localStorage.setItem("notifyTime", timeInput);
+      localStorage.setItem("notifyActive", "true");
+      
+      const btn = document.getElementById("notifyBtn");
+      btn.innerText = `🔕 Stop Notifications (${timeInput})`;
+      btn.classList.add("active");
+      document.getElementById("notificationTimeMenu").style.display = "none";
+      
+      alert(`Success! You will receive daily thoughts at ${timeInput}.`);
+      scheduleNextCheck();
+    } else {
+      alert("Notification permissions denied. Please clear permission settings to activate.");
+    }
+  });
+}
+
+function scheduleNextCheck() {
+  if (notificationTimer) clearInterval(notificationTimer);
+  
+  notificationTimer = setInterval(() => {
+    const isActive = localStorage.getItem("notifyActive") === "true";
+    if (!isActive) {
+      clearInterval(notificationTimer);
+      return;
+    }
+
+    const targetTime = localStorage.getItem("notifyTime");
+    const now = new Date();
+    const currentHours = String(now.getHours()).padStart(2, '0');
+    const currentMinutes = String(now.getMinutes()).padStart(2, '0');
+    const currentTime = `${currentHours}:${currentMinutes}`;
+
+    if (currentTime === targetTime) {
+      const todayString = now.toISOString().split("T");
+      const lastSent = localStorage.getItem("lastNotificationDate");
+
+      if (lastSent !== todayString) {
+        triggerNativeNotification();
+        localStorage.setItem("lastNotificationDate", todayString);
+      }
+    }
+  }, 30000); 
+}
+
+function triggerNativeNotification() {
+  const thoughtText = document.getElementById("thought").innerText;
+  
+  const options = {
+    body: `Today's Thought: "${thoughtText}"`,
+    requireInteraction: true
+  };
+
+  const notification = new Notification("Shreemad Bhagavad Gita", options);
+  
+  notification.onclick = function(event) {
+    event.preventDefault();
+    window.focus();
+    const likeBtn = document.querySelector(".like-btn");
+    if (likeBtn) toggleLike(likeBtn);
+    notification.close();
+  };
+}
+
+let streak=localStorage.getItem('streak')||0; document.getElementById("streakCounter").innerText=`Streak: ${streak}`;
+setTimeout(checkExistingNotification, 1000);
+
 window.toggleLike = toggleLike;
 window.toggleComments = toggleComments;
 window.postComment = postComment;
@@ -351,8 +450,8 @@ window.readDetails = readDetails;
 window.changeDateThought = changeDateThought;
 window.searchThoughts = searchThoughts;
 window.deleteComment = deleteComment;
+window.toggleNotificationSetup = toggleNotificationSetup;
+window.activateDailyNotification = activateDailyNotification;
 </script>
 </body>
 </html>
-
-
