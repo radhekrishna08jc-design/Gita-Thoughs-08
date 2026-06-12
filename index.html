@@ -97,15 +97,9 @@ header {
 .search-bar button { padding: 8px 12px; border: none; background: #8b0000; color: gold; border-radius: 8px; cursor: pointer; }
 .search-bar button:hover { background: #a52a2a; }
 
-@media (max-width: 480px) {
-   /* small phone styles */
-}
-@media (min-width: 481px) and (max-width: 768px) {
-   /* tablet styles */
-}
-@media (min-width: 769px) {
-   /* desktop styles */
-}
+@media (max-width: 480px) { /* small phone styles */ }
+@media (min-width: 481px) and (max-width: 768px) { /* tablet styles */ }
+@media (min-width: 769px) { /* desktop styles */ }
 </style>
 </head>
 <body>
@@ -190,30 +184,35 @@ let notificationTimer = null;
 fetch("Thoughts.csv")
   .then(res => res.text())
   .then(csv => {
-    let rows = csv.split("\n").map(r => r.split(","));
-    rows.shift();
-    rows.forEach(row => {
+    let lines = csv.split("\n");
+    lines.shift();
+    lines.forEach(line => {
+      if(!line.trim()) return;
+      let row = line.split(",");
       if(row.length < 10) return;
       let [date, enThought, enDetails, enExample, hiThought, hiDetails, hiExample, guThought, guDetails, guExample] = row;
-      thoughts[date.trim()] = {
-        en: { thought: enThought, details: enDetails, example: enExample },
-        hi: { thought: hiThought, details: hiDetails, example: hiExample },
-        gu: { thought: guThought, details: guDetails, example: guExample }
+      let cleanDate = date.trim();
+      thoughts[cleanDate] = {
+        en: { thought: enThought.trim(), details: enDetails.trim(), example: enExample.trim() },
+        hi: { thought: hiThought.trim(), details: hiDetails.trim(), example: hiExample.trim() },
+        gu: { thought: guThought.trim(), details: guDetails.trim(), example: guExample.trim() }
       };
-      availableDates.push(date.trim());
+      availableDates.push(cleanDate);
     });
 
     const selectDate = document.getElementById("selectedDate");
+    let fallbackDate = availableDates;
+    
     availableDates.forEach(date => {
-      if (new Date(date) <= new Date()) {
-        let opt = document.createElement("option");
-        opt.value = date;
-        opt.text = date===today?"Today":date;
-        selectDate.appendChild(opt);
-      }
+      let opt = document.createElement("option");
+      opt.value = date;
+      opt.text = date === today ? "Today" : date;
+      selectDate.appendChild(opt);
+      if(date === today) { fallbackDate = today; }
     });
-    selectDate.value = today;
-    loadThought(today);
+    
+    selectDate.value = fallbackDate;
+    loadThought(fallbackDate);
   })
   .catch(err => { document.getElementById("thought").innerText = "⚠ Unable to load thoughts file."; console.error(err); });
 
@@ -226,8 +225,15 @@ function loadThought(date){
     loadLikes(date);
     loadComments(date);
   } else {
-    document.getElementById("thought").innerText = "No thought available for this date.";
-    document.getElementById("details").innerHTML = "";
+    // If exact dynamic client-date isn't reached, show the latest dataset index entry as standard backup
+    let backupDate = availableDates[availableDates.length - 1] || today;
+    if(thoughts[backupDate]) {
+      loadThought(backupDate);
+      document.getElementById("selectedDate").value = backupDate;
+    } else {
+      document.getElementById("thought").innerText = "No thought available for this date.";
+      document.getElementById("details").innerHTML = "";
+    }
   }
 }
 
@@ -321,7 +327,7 @@ function toggleBookmark(){ let btn=document.querySelector(".bookmark-btn"); btn.
 function shareThought(){ let text=document.getElementById("thought").innerText; if(navigator.share){ navigator.share({title:"Bhagavad Gita Thought",text:text}); } else { prompt("Copy this thought:",text); } }
 function toggleMeditation() { const audio = document.getElementById("meditationAudio"); isMeditating = !isMeditating; if (isMeditating) audio.play(); else audio.pause(); }
 
-function searchThoughts(){ let query=document.getElementById("searchInput").value.toLowerCase(); let found=false; for(let date of availableDates){ if(new Date(date) <= new Date() && thoughts[date]['en'].thought.toLowerCase().includes(query)){ document.getElementById("selectedDate").value=date; loadThought(date); found=true; break; } } if(!found) alert("No matching thought found."); }
+function searchThoughts(){ let query=document.getElementById("searchInput").value.toLowerCase(); let found=false; for(let date of availableDates){ if(thoughts[date]['en'].thought.toLowerCase().includes(query)){ document.getElementById("selectedDate").value=date; loadThought(date); found=true; break; } } if(!found) alert("No matching thought found."); }
 
 // ------------------- Notification System -------------------
 function checkExistingNotification() {
