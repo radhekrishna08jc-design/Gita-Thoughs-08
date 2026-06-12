@@ -185,7 +185,7 @@ fetch("Thoughts.csv")
   .then(res => res.text())
   .then(csv => {
     let lines = csv.split("\n");
-    lines.shift();
+    lines.shift(); // Remove header
     lines.forEach(line => {
       if(!line.trim()) return;
       let row = line.split(",");
@@ -193,26 +193,33 @@ fetch("Thoughts.csv")
       let [date, enThought, enDetails, enExample, hiThought, hiDetails, hiExample, guThought, guDetails, guExample] = row;
       let cleanDate = date.trim();
       thoughts[cleanDate] = {
-        en: { thought: enThought.trim(), details: enDetails.trim(), example: enExample.trim() },
-        hi: { thought: hiThought.trim(), details: hiDetails.trim(), example: hiExample.trim() },
-        gu: { thought: guThought.trim(), details: guDetails.trim(), example: guExample.trim() }
+        en: { thought: enThought, details: enDetails, example: enExample },
+        hi: { thought: hiThought, details: hiDetails, example: hiExample },
+        gu: { thought: guThought, details: guDetails, example: guExample }
       };
       availableDates.push(cleanDate);
     });
 
     const selectDate = document.getElementById("selectedDate");
-    let fallbackDate = availableDates;
+    let hasToday = false;
     
     availableDates.forEach(date => {
-      let opt = document.createElement("option");
-      opt.value = date;
-      opt.text = date === today ? "Today" : date;
-      selectDate.appendChild(opt);
-      if(date === today) { fallbackDate = today; }
+      if (new Date(date) <= new Date() || date === today) {
+        let opt = document.createElement("option");
+        opt.value = date;
+        opt.text = date === today ? "Today" : date;
+        selectDate.appendChild(opt);
+        if(date === today) hasToday = true;
+      }
     });
+
+    // Fallback if local date string has a slight mismatched variance
+    if(!hasToday && availableDates.length > 0) {
+      today = availableDates[availableDates.length - 1];
+    }
     
-    selectDate.value = fallbackDate;
-    loadThought(fallbackDate);
+    selectDate.value = today;
+    loadThought(today);
   })
   .catch(err => { document.getElementById("thought").innerText = "⚠ Unable to load thoughts file."; console.error(err); });
 
@@ -225,15 +232,8 @@ function loadThought(date){
     loadLikes(date);
     loadComments(date);
   } else {
-    // If exact dynamic client-date isn't reached, show the latest dataset index entry as standard backup
-    let backupDate = availableDates[availableDates.length - 1] || today;
-    if(thoughts[backupDate]) {
-      loadThought(backupDate);
-      document.getElementById("selectedDate").value = backupDate;
-    } else {
-      document.getElementById("thought").innerText = "No thought available for this date.";
-      document.getElementById("details").innerHTML = "";
-    }
+    document.getElementById("thought").innerText = "No thought available for this date.";
+    document.getElementById("details").innerHTML = "";
   }
 }
 
@@ -327,7 +327,7 @@ function toggleBookmark(){ let btn=document.querySelector(".bookmark-btn"); btn.
 function shareThought(){ let text=document.getElementById("thought").innerText; if(navigator.share){ navigator.share({title:"Bhagavad Gita Thought",text:text}); } else { prompt("Copy this thought:",text); } }
 function toggleMeditation() { const audio = document.getElementById("meditationAudio"); isMeditating = !isMeditating; if (isMeditating) audio.play(); else audio.pause(); }
 
-function searchThoughts(){ let query=document.getElementById("searchInput").value.toLowerCase(); let found=false; for(let date of availableDates){ if(thoughts[date]['en'].thought.toLowerCase().includes(query)){ document.getElementById("selectedDate").value=date; loadThought(date); found=true; break; } } if(!found) alert("No matching thought found."); }
+function searchThoughts(){ let query=document.getElementById("searchInput").value.toLowerCase(); let found=false; for(let date of availableDates){ if(new Date(date) <= new Date() && thoughts[date]['en'].thought.toLowerCase().includes(query)){ document.getElementById("selectedDate").value=date; loadThought(date); found=true; break; } } if(!found) alert("No matching thought found."); }
 
 // ------------------- Notification System -------------------
 function checkExistingNotification() {
