@@ -78,12 +78,9 @@ header {
 .details { display: none; margin-top: 10px; padding: 10px; background: #fff0e1; border-left: 4px solid #8b0000; border-radius: 10px; font-size: 16px; }
 
 .thought-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
-.like-btn, .comment-btn, .bookmark-btn, .share-btn, .meditate-btn, .notify-btn { border: 2px solid black; background: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 16px; transition: 0.3s; }
+.like-btn, .comment-btn, .bookmark-btn, .share-btn, .meditate-btn { border: 2px solid black; background: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 16px; transition: 0.3s; }
 .like-btn.liked { color: red; border-color: red; }
-.comment-btn:hover, .bookmark-btn:hover, .share-btn:hover, .meditate-btn:hover, .notify-btn:hover { background: #ffe4b5; }
-
-.notify-btn.active { background: #8b0000; color: gold; border-color: #8b0000; }
-.notify-btn.active:hover { background: #a52a2a; }
+.comment-btn:hover, .bookmark-btn:hover, .share-btn:hover, .meditate-btn:hover { background: #ffe4b5; }
 
 .comment-section { display: none; margin-top: 20px; padding: 10px; background: #f9f9f9; border-radius: 10px; border: 1px solid #ddd; }
 .comment-section input { width: 80%; padding: 8px; margin-right: 5px; border-radius: 5px; border: 1px solid #ccc; }
@@ -102,10 +99,27 @@ header {
 .search-bar input { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #8b0000; }
 .search-bar button { padding: 8px 12px; border: none; background: #8b0000; color: gold; border-radius: 8px; cursor: pointer; }
 .search-bar button:hover { background: #a52a2a; }
+  <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bhagavad Gita Thoughts</title>
+<style>
+/* your current CSS like body, header, .menu-btn ... */
 
-@media (max-width: 480px) { /* small phone styles */ }
-@media (min-width: 481px) and (max-width: 768px) { /* tablet styles */ }
-@media (min-width: 769px) { /* desktop styles */ }
+... (all your existing styles here) ...
+
+/* ✅ Paste responsive code at the very end of this <style> */
+@media (max-width: 480px) {
+   /* small phone styles */
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+   /* tablet styles */
+}
+
+@media (min-width: 769px) {
+   /* desktop styles */
+}
 </style>
 </head>
 <body>
@@ -140,15 +154,7 @@ header {
     <button class="bookmark-btn" onclick="toggleBookmark()">🔖 Bookmark</button>
     <button class="share-btn" onclick="shareThought()">🔗 Share</button>
     <button class="meditate-btn" onclick="toggleMeditation()">🕉️ Meditate</button>
-    <button class="notify-btn" id="notifyBtn" onclick="toggleNotificationSetup()">🔔 Notify Me</button>
   </div>
-  
-  <div id="notificationTimeMenu" style="display: none; margin-top: 15px; background: #fff0e1; padding: 12px; border-radius: 12px; border-left: 4px solid #8b0000;">
-    <label for="notifyTime" style="font-weight: bold; color: #8b0000; font-size: 15px;">Select Notification Time: </label>
-    <input type="time" id="notifyTime" style="padding: 6px; border-radius: 6px; border: 1px solid #8b0000; margin: 0 8px; font-family: inherit;">
-    <button onclick="activateDailyNotification()" style="padding: 6px 14px; border: none; background: #8b0000; color: gold; border-radius: 6px; cursor: pointer; font-weight: bold;">Set</button>
-  </div>
-
   <div class="comment-section" id="commentSection">
     <div><input type="text" id="commentInput" placeholder="Write a comment..."><button onclick="postComment()">Send</button></div>
     <div id="commentsList"></div>
@@ -184,56 +190,34 @@ const db = getDatabase(app);
 let language = 'en';
 let thoughts = {};
 let availableDates = [];
-let today = new Date().toISOString().split("T");
+let today = new Date().toISOString().split("T")[0];
 let isMeditating = false;
-let notificationTimer = null;
 
 // ------------------- Load CSV -------------------
 fetch("Thoughts.csv")
   .then(res => res.text())
   .then(csv => {
-    let lines = csv.split("\n");
-    lines.shift();
-    lines.forEach(line => {
-      if(!line.trim()) return;
-      let row = line.split(",");
-      if(row.length < 10) return;
-      
+    let rows = csv.split("\n").map(r => r.split(","));
+    rows.shift();
+    rows.forEach(row => {
       let [date, enThought, enDetails, enExample, hiThought, hiDetails, hiExample, guThought, guDetails, guExample] = row;
-      let cleanDate = date.trim();
-      
-      thoughts[cleanDate] = {
+      thoughts[date] = {
         en: { thought: enThought, details: enDetails, example: enExample },
         hi: { thought: hiThought, details: hiDetails, example: hiExample },
         gu: { thought: guThought, details: guDetails, example: guExample }
       };
-      availableDates.push(cleanDate);
+      availableDates.push(date);
     });
 
     const selectDate = document.getElementById("selectedDate");
-    let exactMatchFound = false;
-
     availableDates.forEach(date => {
-      if (new Date(date) <= new Date() || date === today) {
+      if (new Date(date) <= new Date()) {
         let opt = document.createElement("option");
         opt.value = date;
         opt.text = date===today?"Today":date;
         selectDate.appendChild(opt);
-        if(date === today) exactMatchFound = true;
       }
     });
-
-    // Safe handling fallback for clean structural matching execution
-    if(!exactMatchFound && availableDates.length > 0) {
-      let latestDateAvailable = availableDates;
-      for(let d of availableDates) {
-        if(new Date(d) <= new Date()) {
-          latestDateAvailable = d;
-        }
-      }
-      today = latestDateAvailable;
-    }
-
     selectDate.value = today;
     loadThought(today);
   })
@@ -241,14 +225,13 @@ fetch("Thoughts.csv")
 
 // ------------------- Functions -------------------
 function loadThought(date){
-  let cleanDate = date ? date.trim() : "";
-  if(thoughts[cleanDate] && thoughts[cleanDate][language]){
-    let t = thoughts[cleanDate][language];
+  if(thoughts[date] && thoughts[date][language]){
+    let t = thoughts[date][language];
     document.getElementById("thought").innerText = t.thought;
     document.getElementById("details").innerHTML = `<p><b>Explanation:</b> ${t.details}</p><p><b>Real Life Example:</b> ${t.example}</p><button class="read-aloud" onclick="readDetails()">🔊</button>`;
-    document.getElementById("todayLabel").innerText = (cleanDate===today)?"Today's Thought":`Thought for ${cleanDate}`;
-    loadLikes(cleanDate);
-    loadComments(cleanDate);
+    document.getElementById("todayLabel").innerText = (date===today)?"Today's Thought":`Thought for ${date}`;
+    loadLikes(date);
+    loadComments(date);
   } else {
     document.getElementById("thought").innerText = "No thought available for this date.";
     document.getElementById("details").innerHTML = "";
@@ -351,116 +334,6 @@ function toggleMeditation() { const audio = document.getElementById("meditationA
 let streak=localStorage.getItem('streak')||0; document.getElementById("streakCounter").innerText=`Streak: ${streak}`;
 function searchThoughts(){ let query=document.getElementById("searchInput").value.toLowerCase(); let found=false; for(let date of availableDates){ if(new Date(date) <= new Date() && thoughts[date]['en'].thought.toLowerCase().includes(query)){ document.getElementById("selectedDate").value=date; loadThought(date); found=true; break; } } if(!found) alert("No matching thought found."); }
 
-// ------------------- Notification System -------------------
-function checkExistingNotification() {
-  const isConfigured = localStorage.getItem("notifyActive") === "true";
-  const savedTime = localStorage.getItem("notifyTime");
-  const btn = document.getElementById("notifyBtn");
-  
-  if (isConfigured && savedTime) {
-    btn.innerText = `🔕 Stop Notifications (${savedTime})`;
-    btn.classList.add("active");
-    scheduleNextCheck();
-  }
-}
-
-function toggleNotificationSetup() {
-  const isConfigured = localStorage.getItem("notifyActive") === "true";
-  const menu = document.getElementById("notificationTimeMenu");
-  
-  if (isConfigured) {
-    localStorage.setItem("notifyActive", "false");
-    if (notificationTimer) clearInterval(notificationTimer);
-    
-    const btn = document.getElementById("notifyBtn");
-    btn.innerText = "🔔 Notify Me";
-    btn.classList.remove("active");
-    menu.style.display = "none";
-    alert("Daily notifications deactivated.");
-  } else {
-    menu.style.display = menu.style.display === "block" ? "none" : "block";
-  }
-}
-
-function activateDailyNotification() {
-  const timeInput = document.getElementById("notifyTime").value;
-  if (!timeInput) {
-    alert("Please select a valid time.");
-    return;
-  }
-
-  if (!("Notification" in window)) {
-    alert("This browser does not support desktop notifications.");
-    return;
-  }
-
-  Notification.requestPermission().then(permission => {
-    if (permission === "granted") {
-      localStorage.setItem("notifyTime", timeInput);
-      localStorage.setItem("notifyActive", "true");
-      
-      const btn = document.getElementById("notifyBtn");
-      btn.innerText = `🔕 Stop Notifications (${timeInput})`;
-      btn.classList.add("active");
-      document.getElementById("notificationTimeMenu").style.display = "none";
-      
-      alert(`Success! You will receive daily thoughts at ${timeInput}.`);
-      scheduleNextCheck();
-    } else {
-      alert("Notification permissions denied. Please clear permission settings to activate.");
-    }
-  });
-}
-
-function scheduleNextCheck() {
-  if (notificationTimer) clearInterval(notificationTimer);
-  
-  notificationTimer = setInterval(() => {
-    const isActive = localStorage.getItem("notifyActive") === "true";
-    if (!isActive) {
-      clearInterval(notificationTimer);
-      return;
-    }
-
-    const targetTime = localStorage.getItem("notifyTime");
-    const now = new Date();
-    const currentHours = String(now.getHours()).padStart(2, '0');
-    const currentMinutes = String(now.getMinutes()).padStart(2, '0');
-    const currentTime = `${currentHours}:${currentMinutes}`;
-
-    if (currentTime === targetTime) {
-      const todayString = now.toISOString().split("T");
-      const lastSent = localStorage.getItem("lastNotificationDate");
-
-      if (lastSent !== todayString) {
-        triggerNativeNotification();
-        localStorage.setItem("lastNotificationDate", todayString);
-      }
-    }
-  }, 30000); 
-}
-
-function triggerNativeNotification() {
-  const thoughtText = document.getElementById("thought").innerText;
-  
-  const options = {
-    body: `Today's Thought: "${thoughtText}"`,
-    requireInteraction: true
-  };
-
-  const notification = new Notification("Shreemad Bhagavad Gita", options);
-  
-  notification.onclick = function(event) {
-    event.preventDefault();
-    window.focus();
-    const likeBtn = document.querySelector(".like-btn");
-    if (likeBtn) toggleLike(likeBtn);
-    notification.close();
-  };
-}
-
-setTimeout(checkExistingNotification, 1000);
-
 // ------------------- Expose functions globally -------------------
 window.toggleLike = toggleLike;
 window.toggleComments = toggleComments;
@@ -478,8 +351,8 @@ window.readDetails = readDetails;
 window.changeDateThought = changeDateThought;
 window.searchThoughts = searchThoughts;
 window.deleteComment = deleteComment;
-window.toggleNotificationSetup = toggleNotificationSetup;
-window.activateDailyNotification = activateDailyNotification;
 </script>
 </body>
 </html>
+
+
